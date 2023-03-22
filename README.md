@@ -1,6 +1,6 @@
 # vue3-ts-demo
 ```
-基于vue3、typescript搭建的后台管理系统demo 
+基于vue3、typescript、Element Plus搭建的后台管理系统demo 
 ```
 
 ## Project setup
