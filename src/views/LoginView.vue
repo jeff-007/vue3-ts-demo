@@ -100,7 +100,44 @@ export default defineComponent({
 
     console.log('playerOne', playerOne)
 
-    return { ...toRefs(data) }
+    interface Dictionary<T = any> {
+      [key: string]: T;
+    }
+
+    type Partial<T> = {
+      [P in keyof T]?: T[P];
+    }
+
+    interface Todo {
+      titles: string;
+      description: string;
+    }
+
+    function updateTodo (todo: Todo, files: Partial<Todo>) {
+      return { ...todo, ...files }
+    }
+
+    const todo1: Todo = {
+      titles: 'todo1',
+      description: 'test'
+    }
+
+    const todo2 = updateTodo(todo1, {
+      description: 'trow out trash'
+    })
+
+    console.log(todo2)
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface PointConstructor {
+  new (x: number, y: number): Point;
+}
+
+return { ...toRefs(data) }
   }
 })
 </script>
