@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
-    redirect: '/login'
+    redirect: '/about'
     // component: HomeView
   },
   {
