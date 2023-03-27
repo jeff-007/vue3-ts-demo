@@ -28,6 +28,8 @@
       />
     </el-col>
   </el-row>
+<!-- 穿梭框 -->
+  <el-transfer v-model="value" :data="data" />
 </template>
 
 <script setup lang="ts">
@@ -38,8 +40,27 @@ interface RestaurantItem {
   link: string;
 }
 
+interface Option {
+  key: number;
+  label: string;
+  disabled: boolean;
+}
+
+const generateData = () => {
+  const data: Option[] = []
+  for (let i = 1; i <= 15; i++) {
+    data.push({
+      key: i,
+      label: `Option ${i}`,
+      disabled: i % 4 === 0
+    })
+  }
+  return data
+}
 const state1 = ref('')
 const state2 = ref('')
+const data = ref<Option[]>(generateData())
+const value = ref([])
 
 const restaurants = ref<RestaurantItem[]>([])
 const querySearch = (queryString: string, cb: any) => {
