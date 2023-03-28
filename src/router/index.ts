@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
-    redirect: '/about'
+    redirect: '/form'
     // component: HomeView
   },
   {
@@ -20,6 +20,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'login',
     component: () => import(/* webpackChunkName: "about" */ '../views/LoginView.vue')
+  },
+  {
+    path: '/form',
+    name: 'form',
+    component: () => import(/* webpackChunkName: "about" */ '../views/FormView.vue')
   }
 ]
 
