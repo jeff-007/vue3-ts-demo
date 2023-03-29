@@ -45,11 +45,69 @@
         <el-button @click="resetForm(formRef)">Reset</el-button>
       </el-form-item>
     </el-form>
+
+    <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+    <el-tab-pane label="User" name="first">User</el-tab-pane>
+    <el-tab-pane label="Config" name="second">Config</el-tab-pane>
+    <el-tab-pane label="Role" name="third">Role</el-tab-pane>
+    <el-tab-pane label="Task" name="fourth">Task</el-tab-pane>
+  </el-tabs>
+
+  <el-button text @click="dialogVisible = true">
+    click to open the Dialog
+  </el-button>
+
+  <el-dialog
+    v-model="dialogVisible"
+    title="Tips"
+    width="30%"
+    draggable
+    :before-close="handleClose"
+  >
+    <span>This is a message</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="dialogVisible = false">
+          Confirm
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <el-button :plain="true" @click="openVn">VNode</el-button>
   </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
-import type { FormInstance, UploadProps, UploadUserFile } from 'element-plus'
+import { reactive, ref, h } from 'vue'
+import type { FormInstance, UploadProps, UploadUserFile, TabsPaneContext } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
+
+const openVn = () => {
+  ElMessage({
+    message: h('p', null, [
+      h('span', null, 'Message can be '),
+      h('i', { style: 'color: green' }, 'VNode123')
+    ])
+  })
+}
+
+const dialogVisible = ref(false)
+const handleClose = (done: () => void) => {
+  ElMessageBox.confirm('Are you sure to close this dialog?')
+    .then(() => {
+      // done()
+      dialogVisible.value = false
+    })
+    .catch(() => {
+      // catch error
+    })
+}
+
+const activeName = ref('first')
+const handleClick = (tab: TabsPaneContext, event: Event) => {
+  console.log(tab, event)
+}
 
 const formRef = ref<FormInstance>()
 
