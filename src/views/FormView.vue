@@ -103,6 +103,7 @@ const handleClose = (done: () => void) => {
       // catch error
     })
 }
+// 编写一个关闭弹窗的方法
 
 const activeName = ref('first')
 const handleClick = (tab: TabsPaneContext, event: Event) => {
