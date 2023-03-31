@@ -7,7 +7,12 @@
                 <img :src="require('../assets/logo.png')" class="logo" alt="">
             </el-col>
             <el-col :span="16">
-                <p class="main-title">后台管理系统</p>
+              <div class="figure">
+                <div v-for="index in 6" :key="index" class="title-wrap">
+                  <p class="main-title">后台管理系统</p>
+                </div>
+                <!-- <p>后台管理系统</p> -->
+              </div>
             </el-col>
             <el-col :span="4">
                 <p>登录信息</p>
@@ -65,25 +70,113 @@ onMounted(() => {
 <style lang="scss" scoped>
 .header{
     background: rgba(9, 41, 68, 0.6);
+    height: 80px;
     .navigation{
         display: flex;
         align-items: center;
         box-sizing: border-box;
-        padding: 8px 16px;
         color: rgba(255, 255, 255, 1);
-        height: var(--el-header-height);
+        height: 80px;
         .logo{
             width: 32px;
             height: auto;
         }
-        .main-title{
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
+        .figure{
+          animation: wobble 5s ease-in-out infinite;
+          transform-style: preserve-3d;
+          // perspective: 1000px;
+          transform-origin: center center;
+          position: relative;
+          .title-wrap{
+            display: block;
+            width: 100%;
+            position: absolute;
+            animation: glow 5s ease-in-out infinite;
+            &:nth-child(2) {
+              transform: translateZ(4px);
+            }
+            &:nth-child(3) {
+              transform: translateZ(8px);
+            }
+            &:nth-child(4) {
+              transform: translateZ(12px);
+            }
+            &:nth-child(5) {
+              transform: translateZ(16px);
+            }
+            &:nth-child(6) {
+              transform: translateZ(20px);
+            }
+            &:nth-child(7) {
+              transform: translateZ(24px);
+            }
+            .main-title{
+              text-align: center;
+              color: #333;
+              font-size: 40px;
+              position: relative;
+              &::after{
+                content: '后台管理系统';
+                color: transparent;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+                background-clip: text;
+                -webkit-background-clip: text;
+                clip-path: circle(100px at 0% 50%);
+                -webkit-clip-path: circle(100px at 0% 50%);
+                animation: light 5s infinite;
+              }
+            }
+          }
         }
     }
 }
 .el-menu{
     height: calc(100vh - 60px);
 }
+@keyframes light {
+    0% {
+    clip-path: circle(100px at 0% 50%);
+    -webkit-clip-path: circle(100px at 0% 50%);
+    }
+    50% {
+    clip-path: circle(100px at 100% 50%);
+    -webkit-clip-path: circle(100px at 100% 50%);
+    }
+    100% {
+    clip-path: circle(100px at 0% 50%);
+    -webkit-clip-path: circle(100px at 0% 50%);
+    }
+}
+@keyframes wobble {
+    0%, 100% {
+      transform: rotate3d(1, 1, 0, 40deg);
+    }
+    25% {
+      transform: rotate3d(-1, 1, 0, 40deg);
+    }
+    50% {
+      transform: rotate3d(-1, -1, 0, 40deg);
+    }
+    75% {
+      transform: rotate3d(1, -1, 0, 40deg);
+    }
+  }
+  @keyframes glow {
+    0%, 100% {
+      text-shadow: 0 0 10px #03a9f4;
+    }
+    25% {
+      text-shadow: 0 0 10px #f441a5;
+    }
+    50% {
+      text-shadow: 0 0 10px #ffeb3b;
+    }
+    75% {
+      text-shadow: 0 0 10px #03a9f4;
+    }
+  }
 </style>
