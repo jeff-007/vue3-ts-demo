@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'root',
-    redirect: '/home'
+    redirect: '/cssGame'
     // component: () => import(/* webpackChunkName: "about" */ '../views/HomeNew.vue')
   },
   {
@@ -25,6 +25,15 @@ const routes: Array<RouteRecordRaw> = [
     path: '/form',
     name: 'form',
     component: () => import(/* webpackChunkName: "about" */ '../views/FormView.vue')
+  },
+  {
+    path: '/cssGame',
+    name: 'cssGame',
+    // meta: {
+    //   isShow: true,
+    //   title: 'css3D游戏'
+    // },
+    component: () => import(/* webpackChunkName: "about" */ '../views/CssGameView.vue')
   },
   {
     path: '/home',
