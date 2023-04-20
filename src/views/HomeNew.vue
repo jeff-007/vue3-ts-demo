@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { onMounted } from 'vue'
+import { extend } from 'lodash'
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
@@ -71,6 +72,20 @@ const menuList = router.getRoutes().filter(route => {
   const { meta } = route
   return meta.isShow
 })
+
+// 实现一个通用First<T>，它接受一个数组T并返回它的第一个元素的类型
+type First<T extends any[]> = T extends [infer L, ...infer R] ? L :never
+type FirstPlus<T extends any[]> = T extends [] ? T[0] : never
+
+// 实现 Capitalize<T> 它将字符串的第一个字母转换为大写，其余字母保持原样
+type Capitalize<S extends string> = S extends `${infer First}${infer Rest}` ? `${Uppercase<First>}${Rest}` : S
+
+// 实现泛型TupleToUnion<T>，返回元组所有值的类型组成的联合类型
+type TupleToUnion<T extends any[]> = T[number]
+type TupleToUnionPlus<T extends any[]> = T extends [infer L, ...infer R] ? L | TupleToUnionPlus<R>: never
+
+// 将联合类型转换为交叉类型
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
 onMounted(() => {
   console.log('router', router, router.getRoutes())

@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'root',
-    redirect: '/cssGame'
+    redirect: '/home'
     // component: () => import(/* webpackChunkName: "about" */ '../views/HomeNew.vue')
   },
   {
