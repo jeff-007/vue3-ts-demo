@@ -87,6 +87,50 @@ type TupleToUnionPlus<T extends any[]> = T extends [infer L, ...infer R] ? L | T
 // 将联合类型转换为交叉类型
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
 
+interface Dog {
+  bark: () => void;
+}
+
+function dogBark<T extends Dog> (args: T) {
+  args.bark()
+}
+
+type NameOf<T extends { name: unknown }> = T['name']
+
+type Pick<T, K extends keyof T> = {
+  [P in K]: T[P]
+}
+
+// Record<K, T>用来将K的每一个键(k)指定为T类型
+type keys = 'Cat' | 'Dot'
+type Animal = {
+  name: string;
+  age: number
+}
+
+type AppendToObject2<T, K extends keyof any, V> = {
+  [P in keyof T | K]: P extends keyof T ? T[P] : V
+}
+
+type foo = {
+  name: string;
+  age: number
+}
+
+type coo = {
+  age: number;
+  sex: string
+}
+
+type Merge<F, S> = {
+  [P in keyof F | keyof S]: P extends keyof S ? S[P] : P extends keyof F ? F[P] : never
+}
+
+const data = {
+  a: 3,
+  hello: 'world'
+}
+
 onMounted(() => {
   console.log('router', router, router.getRoutes())
 })

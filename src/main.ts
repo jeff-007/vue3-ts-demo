@@ -10,3 +10,18 @@ import 'element-plus/dist/index.css'
 // 不同于其他资源注册方法，.mount()返回值是根组件实例而非应用实例
 const rootApp = createApp(App)
 rootApp.use(store).use(router).use(ElementPlus).mount('#app')
+
+// getGlobalName('HELLO WORLD')
+// jQuery('#app')
+
+// jQuery('#app')
+
+// const cat = new Animal('Tom')
+// console.log(cat)
+
+const settings: Jye.Info = {
+  name: 'Animal',
+  age: '30'
+}
+
+// Jye.getAge()
