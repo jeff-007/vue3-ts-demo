@@ -6,7 +6,7 @@
 class Node {
   data: any;
   next: Node | null;
-  constructor (data = null, options: any = {}) {
+  constructor (data: any = null, options: any = {}) {
     this.data = data
     // by default, each node will point to noting
     this.next = null
@@ -63,7 +63,9 @@ class LinkedList {
     let current = this.header
     while (current !== null) {
       const previous = current
-      current = current.next
+      if (current.next) {
+        current = current.next
+      }
       if (counter === pos) {
         previous.next = current.next
         return true
