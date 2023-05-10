@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'root',
-    redirect: '/home'
+    redirect: '/dataStructure'
     // component: () => import(/* webpackChunkName: "about" */ '../views/HomeNew.vue')
   },
   {
@@ -34,6 +34,15 @@ const routes: Array<RouteRecordRaw> = [
     //   title: 'css3D游戏'
     // },
     component: () => import(/* webpackChunkName: "about" */ '../views/CssGameView.vue')
+  },
+  {
+    path: '/dataStructure',
+    name: 'dataStructure',
+    // meta: {
+    //   isShow: true,
+    //   title: 'css3D游戏'
+    // },
+    component: () => import(/* webpackChunkName: "about" */ '../views/DataStructure.vue')
   },
   {
     path: '/home',
