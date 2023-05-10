@@ -94,6 +94,61 @@ function decimalToBinary (decNumber: number, base: number): string {
 }
 
 console.log(decimalToBinary(100345, 35))
+
+/**
+ * @description 基于对象事项的队列
+ * @param {number} count 队列长度
+ * @param {number} lowestCount 指向第一个元素（最先进入队列的元素）
+ */
+class Queue<T> {
+  count: number;
+  lowestCount: number;
+  private items: {[key: number]: T};
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+
+  // 向队尾追加元素
+  enqueue (element: T) {
+    this.items[this.count] = element
+    this.count++
+  }
+
+  // 移除元素 先进先出
+  dequeue (): T | undefined {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    const result = this.items[this.lowestCount]
+    delete this.items[this.lowestCount]
+    this.lowestCount++
+    return result
+  }
+
+  // 查看队列头元素
+  peek (): T | undefined {
+    if (this.isEmpty()) {
+      return undefined
+    }
+    return this.items[this.lowestCount]
+  }
+
+  isEmpty (): boolean {
+    return this.count - this.lowestCount === 0
+  }
+
+  size (): number {
+    return this.count - this.lowestCount
+  }
+
+  clear () {
+    this.items = {}
+    this.count = 0
+    this.lowestCount = 0
+  }
+}
 </script>
 
 <style scoped lang="scss"></style>
