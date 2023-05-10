@@ -3,84 +3,10 @@
 </template>
 
 <script setup lang="ts">
-class Node {
-  data: any;
-  next: Node | null;
-  constructor (data: any = null, options: any = {}) {
-    this.data = data
-    // by default, each node will point to noting
-    this.next = null
-  }
-}
-
-// Single LinkedList
-class LinkedList {
-  header: Node;
-  constructor () {
-    this.header = new Node()
-  }
-
-  append (item: any) {
-    let current = this.header
-    const newNode = new Node(item)
-    while (current.next != null) {
-      current = current.next
-    }
-    current.next = newNode
-    return true
-  }
-
-  appendAt (pos: number, item: any) {
-    let counter = 0
-    let current = this.header
-    const newNode = new Node(item)
-    while (current.next != null) {
-      if (counter === pos) {
-        newNode.next = current.next
-        current.next = newNode
-        return true
-      }
-      current = current.next
-      counter++
-    }
-    return false
-  }
-
-  remove (item: any) {
-    let current = this.header
-    while (current.next !== null) {
-      const previous = current
-      current = current.next
-      if (current.data === item) {
-        previous.next = current.next
-        return true
-      }
-    }
-    return false
-  }
-
-  removeAt (pos: number, item: any) {
-    let counter = 0
-    let current = this.header
-    while (current !== null) {
-      const previous = current
-      if (current.next) {
-        current = current.next
-      }
-      if (counter === pos) {
-        previous.next = current.next
-        return true
-      }
-      counter++
-    }
-    return false
-  }
-}
-
 /**
- * @param {number} count 栈长度
- * @description 基于数组的栈，时间复杂度为O(n)，n表示数组长度，即最坏情况下需要迭代整个数组直到找到所需元素，
  * @description 基于对象实现的栈，除了toString，其余方法复杂度均为O(1)
+ * @description 基于数组的栈，时间复杂度为O(n)，n表示数组长度，即最坏情况下需要迭代整个数组直到找到所需元素，
+ * @param {number} count 栈长度
  */
 class Stack<T> {
   count: number;
@@ -134,6 +60,40 @@ class Stack<T> {
   }
 }
 
+// 示例
+/**
+ * @param {number} decNumber 待转换数值
+ * @param {number} base 目标进制
+ * @description 根据输入的进制base，将目标数字转为对应进制的结果
+ */
+function decimalToBinary (decNumber: number, base: number): string {
+  const remStack = new Stack<number>()
+  const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let number = decNumber
+  let rem
+  let binaryString = ''
+
+  if (!(base >= 2 && base <= 36)) {
+    return ''
+  }
+
+  while (number > 0) {
+    rem = Math.floor(number % base)
+    remStack.push(rem)
+    number = Math.floor(number / base)
+  }
+
+  while (!remStack.isEmpty()) {
+    // 将十进制转成十六进制时，余数是0～9加上A、B、C、D、E和F（对应10、11、12、13、14和15），需要对栈中的数字做个转化
+    const popItem = remStack.pop()
+    if (popItem) {
+      binaryString += popItem
+    }
+  }
+  return binaryString
+}
+
+console.log(decimalToBinary(100345, 35))
 </script>
 
 <style scoped lang="scss"></style>
