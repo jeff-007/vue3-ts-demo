@@ -60,8 +60,8 @@ class Stack<T> {
   }
 }
 
-// 示例
 /**
+ * 示例
  * @param {number} decNumber 待转换数值
  * @param {number} base 目标进制
  * @description 根据输入的进制base，将目标数字转为对应进制的结果
@@ -96,9 +96,9 @@ function decimalToBinary (decNumber: number, base: number): string {
 console.log(decimalToBinary(100345, 35))
 
 /**
- * @description 基于对象事项的队列
  * @param {number} count 队列长度
  * @param {number} lowestCount 指向第一个元素（最先进入队列的元素）
+ * @description 基于对象事项的队列
  */
 class Queue<T> {
   count: number;
@@ -147,6 +147,79 @@ class Queue<T> {
     this.items = {}
     this.count = 0
     this.lowestCount = 0
+  }
+}
+
+/**
+ * 示例
+ * @description 使用循环队列模拟击鼓传花游戏
+ * @description 将参与者名单添加至队列中，给定一个数字迭代队列，从队列开头移除一项，再添加至队尾，循环结束时，从队头移除项被淘汰
+ */
+function hotPotato<T> (elementList: Array<T>, num: number): { eliminated: Array<T>, winner: T} {
+  const queue = new Queue()
+  const eliminatedList: Array<T> = []
+  elementList.forEach(element => {
+    queue.enqueue(element)
+  })
+  while (queue.size() > 1) {
+    for (let i = 0; i < num; i++) {
+      queue.enqueue(queue.dequeue() as T)
+    }
+    eliminatedList.push(queue.dequeue() as T)
+  }
+  return {
+    eliminated: eliminatedList,
+    winner: queue.dequeue() as T
+  }
+}
+
+const names = ['John', 'Jack', 'Caf', 'Ingrid', 'Carl']
+const result = hotPotato(names, 7)
+result.eliminated.forEach(name => {
+  console.log(`${name}在游戏中被淘汰`)
+})
+console.log(`胜利者：${result.winner}`)
+
+/**
+ * @description 基于对象实现的双向队列，同时遵循先进先出、后进先出的原则，栈和队列相结合的一种数据结构
+ */
+
+class Deque<T> {
+  count: number;
+  lowestCount: number;
+  items: {[key: number]: T}
+  constructor () {
+    this.count = 0
+    this.lowestCount = 0
+    this.items = {}
+  }
+
+  // 在双向队列前端添加元素
+  addFront (element: T) {
+    if (this.isEmpty()) {
+      // 空队列，执行向队尾添加元素的方法
+      this.addBack(element)
+    } else if (this.lowestCount > 0) {
+      // lowestCount 大于0 表示已有元素从双向队列移除
+      this.lowestCount--
+      this.items[this.lowestCount] = element
+    } else {
+      for (let i = this.count; i > 0; i--) {
+        this.items[i] = this.items[i - 1]
+      }
+      this.count++
+      this.lowestCount = 0
+      this.items[0] = element
+    }
+  }
+
+  // 在双向队列尾部添加元素
+  addBack (element: T) {
+    console.log(element)
+  }
+
+  isEmpty (): boolean {
+    return this.count - this.lowestCount === 0
   }
 }
 </script>
