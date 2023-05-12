@@ -222,6 +222,97 @@ class Deque<T> {
     return this.count - this.lowestCount === 0
   }
 }
+
+/**
+ * @description 链表
+ * @param {class} Node 链表中的节点类
+ * @param {function} equalsFn 自定义比较函数，比较两个js对象或值是否相等
+ */
+class Node<T> {
+  element: T;
+  next?: Node<T>
+  // next?: Node<T>
+  constructor (element: T) {
+    this.element = element
+    this.next = undefined
+  }
+}
+function defaultEquals<T> (a: T, b: T) {
+  return a === b
+}
+class LinkedList<T> {
+  private count: number;
+  private head?: Node<T>;
+  private equalsFn: (a: T, b: T) => boolean;
+  constructor (equalsFn = defaultEquals) {
+    this.count = 0
+    this.head = undefined
+    this.equalsFn = equalsFn
+  }
+
+  // 向链表啊尾部添加一个元素
+  push (element: T) {
+    const node = new Node(element)
+    let current
+    if (!this.head) {
+      this.head = node
+    } else {
+      current = this.head
+      while (current.next != null) {
+        current = current.next
+      }
+      // 将当前节点的next赋值为新元素，建立链接
+      current.next = node
+    }
+    this.count++
+  }
+
+  // 获取链表中特定位置的元素
+  getElementAt (index: number) {
+    if (index < 0 || index > this.count) return undefined
+    let node = this.head
+    for (let i = 0; i < index && node; i++) {
+      node = node.next
+    }
+    return node
+  }
+
+  // 移除给定位置的元素，区分移除第一个元素或是第一个以外的其他元素
+  removeAt (index: number) {
+    if (index < 0 || index >= this.count) return undefined
+    let current = this.head
+    if (!current) return undefined
+    if (index === 0) {
+      this.head = current.next
+    } else {
+      const previous = this.getElementAt(index - 1)
+      if (!previous) return undefined
+      current = previous.next
+      if (!current) return undefined
+      previous.next = current.next
+    }
+    this.count--
+    return current.element
+  }
+
+  // 移除给定数据项的元素
+  remove (element: T): T | undefined {
+    const index = this.indexOf(element)
+    return this.removeAt(index)
+  }
+
+  // 返回所查找元素的位置
+  indexOf (element: T): number {
+    let current = this.head
+    for (let i = 0; i < this.count && current != null; i++) {
+      if (this.equalsFn(element, current.element)) {
+        return i
+      }
+      current = current.next
+    }
+    return -1
+  }
+}
 </script>
 
 <style scoped lang="scss"></style>
