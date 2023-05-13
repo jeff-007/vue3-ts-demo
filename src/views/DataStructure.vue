@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+import { NODE_EXPAND } from 'element-plus/es/components/tree-v2/src/virtual-tree'
+
 /**
  * @description 基于对象实现的栈，除了toString，其余方法复杂度均为O(1)
  * @description 基于数组的栈，时间复杂度为O(n)，n表示数组长度，即最坏情况下需要迭代整个数组直到找到所需元素，
@@ -301,6 +303,24 @@ class LinkedList<T> {
     return this.removeAt(index)
   }
 
+  insert (element: T, index: number): boolean {
+    if (index < 0 || index > this.count) return false
+    const node = new Node(element)
+    if (index === 0) {
+      const current = this.head
+      node.next = current
+      this.head = node
+    } else {
+      const previous = this.getElementAt(index - 1)
+      if (!previous) return false
+      const current = previous.next
+      node.next = current
+      previous.next = node
+    }
+    this.count++
+    return true
+  }
+
   // 返回所查找元素的位置
   indexOf (element: T): number {
     let current = this.head
@@ -313,6 +333,168 @@ class LinkedList<T> {
     return -1
   }
 }
+
+/**
+ * @description 双向链表，可以使用interface的形式完整定义，也可以使用继承单向链表的形式重写部分方法
+ * @description 双向链表中的节点包含指向前个、下个元素的指针
+ */
+class DoublyNode<T> extends Node<T> {
+  prev?: DoublyNode<T>;
+  constructor (element: T, next?: Node<T>, prev?: DoublyNode<T>) {
+    super(element)
+    this.prev = prev
+  }
+}
+class DoublyLinkedList<T> extends LinkedList<T> {
+  private tail?: DoublyNode<T> | undefined
+  constructor (equalsFn = defaultEquals) {
+    super(equalsFn)
+    this.tail = undefined
+  }
+}
+
+// interface ILinkedList<T> {
+//   push(element: T): void;
+//   insert(element: T, position: number): boolean;
+//   getElementAt(index: number): DoublyNode<T> | undefined;
+//   remove(element: T): T | undefined;
+//   indexOf(element: T): number;
+//   removeAt(position: number): T | undefined;
+//   isEmpty(): boolean;
+//   size(): number;
+//   toString(): string;
+// }
+
+// class LinkedList<T> implements ILinkedList<T> {
+//   protected count: number;
+//   protected head: DoublyNode<T> | undefined;
+//   protected tail: DoublyNode<T> | undefined;
+
+//   constructor() {
+//     this.count = 0;
+//     this.head = undefined;
+//     this.tail = undefined;
+//   }
+
+//   push(element: T): void {
+//     const node = new DoublyNode(element, undefined, this.tail);
+//     if (this.tail == null) {
+//       this.head = node;
+//       this.tail = node;
+//     } else {
+//       this.tail.next = node;
+//       this.tail = node;
+//     }
+//     this.count++;
+//   }
+
+//   insert(element: T, position: number): boolean {
+//     if (position >= 0 && position <= this.count) {
+//       const node = new DoublyNode(element);
+//       let current = this.head;
+//       if (position === 0) {
+//         if (this.head == null) {
+//           this.head = node;
+//           this.tail = node;
+//         } else {
+//           node.next = this.head;
+//           current.prev = node;
+//           this.head = node;
+//         }
+//       } else if (position === this.count) {
+//         current = this.tail;
+//         current.next = node;
+//         node.prev = current;
+//         this.tail = node;
+//       } else {
+//         const previous = this.getElementAt(position - 1);
+//         current = previous.next;
+//         node.next = current;
+//         previous.next = node;
+//         current.prev = node;
+//         node.prev = previous;
+//       }
+//       this.count++;
+//       return true;
+//     }
+//     return false;
+//   }
+
+//   getElementAt(index: number): DoublyNode<T> | undefined {
+//     if (index >= 0 && index <= this.count) {
+//       let node = this.head;
+//       for (let i = 0; i < index && node != null; i++) {
+//         node = node.next;
+//       }
+//       return node;
+//     }
+//     return undefined;
+//   }
+
+//   remove(element: T): T | undefined {
+//     const index = this.indexOf(element);
+//     return this.removeAt(index);
+//   }
+
+//   indexOf(element: T): number {
+//     let current = this.head;
+//     for (let i = 0; i < this.count && current != null; i++) {
+//       if (element === current.element) {
+//         return i;
+//       }
+//       current = current.next;
+//     }
+//     return -1;
+//   }
+
+//   需要分别处理在链表头、尾、中间移除节点的情况
+//   removeAt(position: number): T | undefined {
+//     if (position >= 0 && position < this.count) {
+//       let current = this.head;
+//       if (position === 0) {
+//         this.head = current.next;
+//         if (this.count === 1) {
+//           this.tail = undefined;
+//         } else {
+//           this.head.prev = undefined;
+//         }
+//       } else if (position === this.count - 1) {
+//         current = this.tail;
+//         this.tail = current.prev;
+//         this.tail.next = undefined;
+//       } else {
+//         current = this.getElementAt(position);
+//         const previous = current.prev;
+//         previous.next = current.next;
+//         current.next.prev = previous;
+//       }
+//       this.count--;
+//       return current.element;
+//     }
+//     return undefined;
+//   }
+
+//   isEmpty(): boolean {
+//     return this.count === 0;
+//   }
+
+//   size(): number {
+//     return this.count;
+//   }
+
+//   toString(): string {
+//     if (this.head == null) {
+//       return '';
+//     }
+//     let objString = `${this.head.element}`;
+//     let current = this.head.next;
+//     for (let i = 1; i < this.size() && current != null; i++) {
+//       objString = `${objString},${current.element}`;
+//       current = current.next;
+//     }
+//     return objString;
+//   }
+// }
 </script>
 
 <style scoped lang="scss"></style>
