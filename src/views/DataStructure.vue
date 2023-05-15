@@ -244,7 +244,7 @@ function defaultEquals<T> (a: T, b: T) {
 }
 class LinkedList<T> {
   private count: number;
-  private head?: Node<T>;
+  protected head?: Node<T>;
   private equalsFn: (a: T, b: T) => boolean;
   constructor (equalsFn = defaultEquals) {
     this.count = 0
@@ -331,6 +331,14 @@ class LinkedList<T> {
       current = current.next
     }
     return -1
+  }
+
+  isEmpty (): boolean {
+    return this.count === 0
+  }
+
+  size (): number {
+    return this.count
   }
 }
 
@@ -495,6 +503,158 @@ class DoublyLinkedList<T> extends LinkedList<T> {
 //     return objString;
 //   }
 // }
+
+/**
+ * @description 有序链表
+ */
+enum Compare {
+  LESS_THAN = -1,
+  BIGGER_THAN = 1
+}
+
+type CompareFn<T> = (a: T, b: T) => number;
+
+// 比较两个元素
+function defaultCompare<T> (a: T, b: T): number {
+  if (a === b) return 0
+  return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN
+}
+
+class SortedLinkedList<T> extends LinkedList<T> {
+  public compareFn: CompareFn<T>
+  // constructor中传参的两种写法，equalsFn设置默认值，不需要再声明为可选参数，compareFn声明为可选参数则需要在初始化中设置this.compareFn赋值的默认值
+  constructor (equalsFn = defaultEquals, compareFn?: CompareFn<T>) {
+    super(equalsFn)
+    this.compareFn = compareFn || defaultCompare
+  }
+
+  // 重写insert方法
+  insert (element: T, index = 0): boolean {
+    if (this.isEmpty()) {
+      return super.insert(element, 0)
+    }
+    const pos = this.getIndexNextSortedElement(element)
+    return super.insert(element, pos)
+  }
+
+  getIndexNextSortedElement (element: T): number {
+    let current = this.head
+    let i = 0
+    for (; i < this.size() && current; i++) {
+      const comp = this.compareFn(element, current.element)
+      if (comp === Compare.LESS_THAN) {
+        return i
+      }
+      current = current.next
+    }
+    return i
+  }
+}
+
+/**
+ * @description 二叉搜索树（BST），二叉树的一种，左侧只存比父节点小的值，右侧村比父节点大的值
+ */
+
+/**
+ * @description 定义二叉树节点
+ * @param left {@link T} 左侧子节点
+ * @param right {@link T} 右侧子节点
+ */
+interface IBiTNode<T> {
+  key: T;
+  left: IBiTNode<T> | null;
+  right: IBiTNode<T> | null;
+}
+
+class BiTNode<T> implements IBiTNode<T> {
+  key: T;
+  left: IBiTNode<T> | null;
+  right: IBiTNode<T> | null
+  constructor (key: T) {
+    this.key = key
+    this.left = null
+    this.right = null
+  }
+}
+
+class BinarySearchTree<T> {
+  root: BiTNode<T> | null;
+  public compareFn: CompareFn<T>;
+  constructor (compareFn = defaultCompare) {
+    this.compareFn = compareFn
+    this.root = null
+  }
+
+  // 插入新的键（节点）
+  insert (key: T) {
+    if (this.root == null) {
+      this.root = new BiTNode<T>(key)
+      return
+    }
+    this.insertNode(this.root, key)
+  }
+
+  // 通过递归的形式，在父节点中插入新节点（满足左侧节点值比父节点小，右侧节点值比父节点大）
+  private insertNode (node: BiTNode<T>, key: T) {
+    if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+      if (node.left == null) {
+        node.left = new BiTNode<T>(key)
+      } else {
+        this.insertNode(node.left, key)
+      }
+    } else {
+      if (node.right == null) {
+        node.right = new BiTNode<T>(key)
+      } else {
+        this.insertNode(node.right, key)
+      }
+    }
+  }
+
+  // 查找树中的某个键（节点）
+  // search (key) {}
+
+  // 中序遍历树中所有节点
+  // 按从小到大的顺序访问所有节点，常用于对树进行排序
+  inOrderTraverse (callback?: (key: T) => void) {
+    this.inOrderTraverseNode(this.root, callback)
+  }
+
+  inOrderTraverseNode (node: BiTNode<T> | null, callback?: (key: T) => void) {
+    if (node == null) return
+    this.inOrderTraverseNode(node.left, callback)
+    callback && callback(node.key)
+    this.inOrderTraverseNode(node.right, callback)
+  }
+
+  // // 先序遍历树中的所有节点
+  // preOrderTraverse () {}
+
+  // // 后序遍历树中的所有节点
+  // postOrderTraverse () {}
+
+  // // 返回树中最小的键（节点）
+  // min () {}
+
+  // // 返回树中最大的键（节点）
+  // max () {}
+
+  // // 移除树中某个节点
+  // remove () {}
+}
+
+const tree = new BinarySearchTree<number>()
+tree.insert(11)
+tree.insert(7)
+tree.insert(15)
+tree.insert(12)
+tree.insert(20)
+tree.insert(18)
+tree.insert(25)
+tree.insert(30)
+const printNode = (value: number) => console.log(value)
+tree.inOrderTraverse(printNode)
+
 </script>
 
 <style scoped lang="scss"></style>
