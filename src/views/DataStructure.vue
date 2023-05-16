@@ -621,23 +621,81 @@ class BinarySearchTree<T> {
   }
 
   inOrderTraverseNode (node: BiTNode<T> | null, callback?: (key: T) => void) {
-    if (node == null) return
+    if (!node) return
     this.inOrderTraverseNode(node.left, callback)
     callback && callback(node.key)
     this.inOrderTraverseNode(node.right, callback)
   }
 
-  // // 先序遍历树中的所有节点
-  // preOrderTraverse () {}
+  // 先序遍历树中的所有节点
+  // 优先于后代节点的顺序访问每个节点，常用于打印结构化文档
+  preOrderTraverse (callback?: (key: T) => void) {
+    this.preOrderTraverseNode(this.root, callback)
+  }
 
-  // // 后序遍历树中的所有节点
-  // postOrderTraverse () {}
+  preOrderTraverseNode (node: BiTNode<T> | null, callback?: (key: T) => void) {
+    if (!node) return
+    callback && callback(node.key)
+    this.preOrderTraverseNode(node.left, callback)
+    this.preOrderTraverseNode(node.right, callback)
+  }
 
-  // // 返回树中最小的键（节点）
-  // min () {}
+  // 后序遍历树中的所有节点
+  // 优先访问节点的后代节点，再访问节点本身，常用于计算一个目录及其子目录所有文件占空间的大小
+  postOrderTraverse (callback?: (key: T) => void) {
+    this.postOrderTraverseNode(this.root, callback)
+  }
 
-  // // 返回树中最大的键（节点）
-  // max () {}
+  postOrderTraverseNode (node: BiTNode<T> | null, callback?: (key: T) => void) {
+    if (!node) return
+    this.postOrderTraverseNode(node?.left, callback)
+    this.postOrderTraverseNode(node.right, callback)
+    callback && callback(node.key)
+  }
+
+  // 返回二叉搜索树中最小的键（节点）
+  // 即最左侧叶节点
+  min () {
+    return this.minNode(this.root)
+  }
+
+  minNode (node: BiTNode<T> | null) {
+    let current = node
+    while (current && current.left) {
+      current = current.left
+    }
+    return current
+  }
+
+  // 返回二叉搜索树中最大的键（节点）
+  // 即最右侧叶节点
+  max () {
+    return this.maxNode(this.root)
+  }
+
+  maxNode (node: BiTNode<T> | null) {
+    let current = node
+    while (current && current.right) {
+      current = current.right
+    }
+    return current
+  }
+
+  // 搜索是否包含一个特定的值
+  search (key: T) {
+    return this.searchNode(this.root, key)
+  }
+
+  searchNode (node: BiTNode<T> | null, key: T): boolean {
+    if (!node) return false
+    if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+      return this.searchNode(node.left, key)
+    } else if (this.compareFn(key, node.key) === Compare.BIGGER_THAN) {
+      return this.searchNode(node.right, key)
+    } else {
+      return true
+    }
+  }
 
   // // 移除树中某个节点
   // remove () {}
@@ -654,6 +712,8 @@ tree.insert(25)
 tree.insert(30)
 const printNode = (value: number) => console.log(value)
 tree.inOrderTraverse(printNode)
+console.log('=====')
+tree.preOrderTraverse(printNode)
 
 </script>
 
