@@ -697,8 +697,43 @@ class BinarySearchTree<T> {
     }
   }
 
-  // // 移除树中某个节点
-  // remove () {}
+  // 移除树中某个节点
+  remove (key: T) {
+    this.root = this.removeNode(this.root, key)
+  }
+
+  removeNode (node: BiTNode<T> | null, key: T): BiTNode<T> | null {
+    if (!node) return null
+    // 通过遍历在树中找到需要移除的节点
+    if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+      node.left = this.removeNode(node.left, key)
+      return node
+    } else if (this.compareFn(key, node.key) === Compare.BIGGER_THAN) {
+      node.right = this.removeNode(node.right, key)
+      return node
+    } else {
+      // 查询到了需要移除的节点（建和node.key相同）
+      // 情况一：删除没有左、右子树的叶节点，将节点置为null进行移除，并通过返回节点自身（null）处理父节点指针
+      if (!node.left && !node.right) {
+        node = null
+        return node
+      }
+      // 情况二：仅包含左子树或右子树的节点，更新节点指向其子节点，并返回更新后的节点修改其父节点的指针
+      if (node.left == null) {
+        node = node.right
+        return node
+      } else if (node.right == null) {
+        node = node.left
+        return node
+      }
+      // 情况三：移除同事包含两个子节点的节点
+      // 查询该节点右子树中键最小的节点，使用最小节点的键更新该节点的值，同时移除该最小值得节点，返回更新后得节点更新其父节点得指针
+      const aux = this.minNode(node.right) as BiTNode<T>
+      node.key = aux.key
+      node.right = this.removeNode(node.right, aux.key)
+      return node
+    }
+  }
 }
 
 const tree = new BinarySearchTree<number>()
@@ -710,9 +745,12 @@ tree.insert(20)
 tree.insert(18)
 tree.insert(25)
 tree.insert(30)
-const printNode = (value: number) => console.log(value)
+const printNode = (value: number) => console.log(`--${value}--`)
 tree.inOrderTraverse(printNode)
 console.log('=====')
+// tree.preOrderTraverse(printNode)
+
+tree.remove(20)
 tree.preOrderTraverse(printNode)
 
 </script>
