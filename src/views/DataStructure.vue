@@ -589,13 +589,14 @@ class BinarySearchTree<T> {
   insert (key: T) {
     if (this.root == null) {
       this.root = new BiTNode<T>(key)
-      return
+      return this
     }
     this.insertNode(this.root, key)
+    return this
   }
 
   // 通过递归的形式，在父节点中插入新节点（满足左侧节点值比父节点小，右侧节点值比父节点大）
-  private insertNode (node: BiTNode<T>, key: T) {
+  insertNode (node: BiTNode<T>, key: T) {
     if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
       if (node.left == null) {
         node.left = new BiTNode<T>(key)
@@ -737,14 +738,7 @@ class BinarySearchTree<T> {
 }
 
 const tree = new BinarySearchTree<number>()
-tree.insert(11)
-tree.insert(7)
-tree.insert(15)
-tree.insert(12)
-tree.insert(20)
-tree.insert(18)
-tree.insert(25)
-tree.insert(30)
+tree.insert(11).insert(25).insert(30).insert(10).insert(40)
 const printNode = (value: number) => console.log(`--${value}--`)
 tree.inOrderTraverse(printNode)
 console.log('=====')
@@ -753,6 +747,258 @@ console.log('=====')
 tree.remove(20)
 tree.preOrderTraverse(printNode)
 
+/**
+ * @description AVL树（Adelson-Velskii-Landi树）平衡二叉树
+ * @description AVL树，其左子树、右子树均为平衡二叉树，任何一个节点左右子树的深度之差最多为1，添加或移除节点时，AVL树会尽可能尝试转为完全树，优化节点搜索时的性能问题
+ * @description 节点（结点）的平衡因子：该节点左子树的深度减去右子树深度的值（-1，0，1）
+ */
+enum BalanceFactor {
+  UNBALANCED_RIGHT = 1,
+  SLIGHTLY_UNBALANCED_RIGHT = 2,
+  BALANCED = 3,
+  SLIGHTLY_UNBALANCED_LEFT = 4,
+  UNBALANCED_LEFT = 5
+}
+class AVLTree<T> extends BinarySearchTree<T> {
+  constructor (compareFn = defaultCompare) {
+    super(compareFn)
+    this.compareFn = compareFn
+    this.root = null
+  }
+
+  // 此处节点（结点）高度的定义：该节点到其任意子节点的边的最大值
+  getNodeHeight (node: BiTNode<T> | null): number {
+    if (node == null) {
+      return -1
+    }
+    return Math.max(this.getNodeHeight(node.left), this.getNodeHeight(node.right)) + 1
+  }
+
+  // 计算节点平衡因子
+  getBalanceFactor (node: BiTNode<T>) {
+    const heightDifference = this.getNodeHeight(node.left) - this.getNodeHeight(node.right)
+    switch (heightDifference) {
+      case -2:
+        return BalanceFactor.UNBALANCED_RIGHT
+      case -1:
+        return BalanceFactor.SLIGHTLY_UNBALANCED_RIGHT
+      case 1:
+        return BalanceFactor.SLIGHTLY_UNBALANCED_LEFT
+      case 2:
+        return BalanceFactor.UNBALANCED_LEFT
+      default:
+        return BalanceFactor.BALANCED
+    }
+  }
+
+  // 添加、删除节点后，计算节点的高度并验证是否需要平衡
+  // LL：向右单旋转 RR：向左单旋转 LR：向右双旋转（先LL旋转，再RR旋转）RL：向左双旋转（先RR旋转，再LL旋转）
+  rotationLL (node: BiTNode<T>) {
+    const temp = node.left
+    if (!temp) return null
+    node.left = temp.right
+    temp.right = node
+    return temp
+  }
+}
+
+/**
+ * @description 红黑树 一种平衡二叉树
+ * @description AVL树在插入、移除节点时会造成旋转，AVL树适用插入、删除节点频率低的场景；JDK的集合类TreeMap、TreeSet的底层使用红黑树实现，Java8中HashMap也用到了红黑树;
+ * @description 红黑树规则：1.每个节点为红色或者黑色 2.根节点为黑色 3.所有叶节点为黑色 4.红色节点的两个子节点均为黑色 5.不能存在相邻的红节点 6.从给定节点到其后代节点（叶节点）所有路径包含相同数量的黑色节点
+ */
+enum Colors {
+  RED = 'red',
+  BLACK = 'black',
+}
+class RedBlackNode<T> extends BiTNode<T> {
+  color: string
+  parent: RedBlackNode<T> | null
+  left: RedBlackNode<T> | null
+  right: RedBlackNode<T> | null
+  constructor (key: T) {
+    super(key)
+    this.key = key
+    this.color = Colors.RED
+    this.parent = null
+    this.left = null
+    this.right = null
+  }
+
+  isRed () {
+    return this.color === Colors.RED
+  }
+}
+
+class RedBlackTree<T> extends BinarySearchTree<T> {
+  root: RedBlackNode<T> | null // add type annotation for root property
+
+  constructor (compareFn = defaultCompare) {
+    super(compareFn)
+    this.compareFn = compareFn
+    this.root = null
+  }
+
+  // 如果为空树，插入为根节点，并置为黑色
+  // 新插入节点默认为红色
+  insert (key: T) {
+    if (this.root == null) {
+      this.root = new RedBlackNode<T>(key)
+      this.root.color = Colors.BLACK
+      return this
+    } else {
+      // 查询节点插入的位置，插入成功后返回新节点并验证是否满足红黑树规则
+      const newNode = this.insertNode(this.root, key)
+      this.fixTreeProperties(newNode)
+      return this
+    }
+  }
+
+  // 重写insert方法
+  // 分别遍历左、右子树，在合适位置插入新节点，并返回新插入节点校验是否满足红黑树规则
+  insertNode (node: RedBlackNode<T>, key: T): RedBlackNode<T> {
+    if (this.compareFn(key, node.key) === Compare.LESS_THAN) {
+      if (node.left == null) {
+        node.left = new RedBlackNode(key)
+        node.left.parent = node
+        return node.left
+      } else {
+        return this.insertNode(node.left, key)
+      }
+    } else if (node.right == null) {
+      node.right = new RedBlackNode(key)
+      node.right.parent = node
+      return node.right
+    } else {
+      return this.insertNode(node.right, key)
+    }
+  }
+
+  // 新插入节点为红色，需要根据规则5、6进行调整
+  // 新插入节点的父节点为黑色不需调整，如果父节点为红色，则要同时调整父节点，父节点的兄弟节点以及祖父节点
+  fixTreeProperties (node: RedBlackNode<T>): void {
+    while (node && node.parent && node.parent.color === Colors.RED && node.color !== Colors.BLACK) {
+      let parent = node.parent
+      const grandParent = parent.parent
+
+      // case A: parent is left child of grandparent
+      // 情形A：节点的父节点是其祖父节点的左侧子节点
+      if (grandParent && grandParent.left === parent) {
+        const uncle = grandParent.right
+
+        // case 1: uncle is also red - only recoloring
+        // 情形A1：节点的叔节点也为红色，只需要重新填色
+        if (uncle && uncle.color === Colors.RED) {
+          grandParent.color = Colors.RED
+          parent.color = Colors.BLACK
+          uncle.color = Colors.BLACK
+          // 将当前节点的引用指向祖父节点，继续检查祖父节点和其他关联的节点是否有冲突
+          node = grandParent
+        } else {
+        // case 2: node is right child - left rotate
+        // 情形A2：节点是其父节点的右侧子节点，进行左旋转
+          if (node === parent.right) {
+            this.rotationLeft(parent)
+            node = parent
+            if (node.parent) {
+              parent = node.parent
+            }
+          }
+
+          // case 3: node is left child - right rotate
+          // 情形A3：节点是其父节点的左侧子节点，进行右旋转
+          this.rotationRight(grandParent)
+          parent.color = Colors.BLACK
+          grandParent.color = Colors.RED
+          node = parent
+        }
+      } else { // case B: parent is right child of grandparent
+        const uncle = grandParent && grandParent.left
+
+        // case 1: uncle is also red - only recoloring
+        if (uncle && uncle.color === Colors.RED) {
+          grandParent.color = Colors.RED
+          parent.color = Colors.BLACK
+          uncle.color = Colors.BLACK
+          node = grandParent
+        } else {
+        // case 2: node is left child - right rotate
+        // 情形B2：节点是其父节点的左侧子节点，进行左旋转
+          if (node === parent.left) {
+            this.rotationRight(parent)
+            node = parent
+            if (node.parent) {
+              parent = node.parent
+            }
+          }
+
+          // case 3: node is right child - left rotate
+          // 情形B3：节点是其父节点的右侧子节点，进行左旋转
+          if (grandParent) {
+            this.rotationLeft(grandParent)
+            grandParent.color = Colors.RED
+          }
+          parent.color = Colors.BLACK
+        }
+      }
+    }
+
+    // ensure root is black
+    if (this.root) {
+      this.root.color = Colors.BLACK
+    }
+  }
+
+  // 向右单旋转 rotationLL
+  rotationRight (node: RedBlackNode<T>) {
+    const temp = node.left
+    if (!temp) return
+    // 旋转时，需要同时修改子节点指针以及父节点指针
+    node.left = temp.right
+    if (temp.right && temp.right.key) {
+      temp.right.parent = node
+    }
+    temp.parent = node.parent
+    if (!node.parent) {
+      this.root = temp
+    } else {
+      if (node === node.parent.left) {
+        node.parent.left = temp
+      } else {
+        node.parent.right = temp
+      }
+    }
+    // 修改完temp和node父节点的指针后，再修改temp和node的关联指针
+    temp.right = node
+    node.parent = temp
+  }
+
+  // 向左单旋转 rotationRR
+  rotationLeft (node: RedBlackNode<T>) {
+    const temp = node.right
+    if (!temp) return
+    node.right = temp.left
+    if (temp.left && temp.left.key) {
+      temp.left.parent = node
+    }
+    temp.parent = node.parent
+    if (!node.parent) {
+      this.root = temp
+    } else {
+      if (node === node.parent.left) {
+        node.parent.left = temp
+      } else {
+        node.parent.right = temp
+      }
+    }
+    temp.left = node
+    node.parent = temp
+  }
+}
+
+const redNode = new RedBlackNode('123')
+redNode.color = '123'
+console.log('redNode', redNode)
 </script>
 
 <style scoped lang="scss"></style>
