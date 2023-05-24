@@ -520,6 +520,12 @@ function defaultCompare<T> (a: T, b: T): number {
   return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN
 }
 
+function swap<T> (array: Array<T>, a: number, b: number) {
+  const temp = array[a]
+  array[a] = array[b]
+  array[b] = temp
+}
+
 class SortedLinkedList<T> extends LinkedList<T> {
   public compareFn: CompareFn<T>
   // constructor中传参的两种写法，equalsFn设置默认值，不需要再声明为可选参数，compareFn声明为可选参数则需要在初始化中设置this.compareFn赋值的默认值
@@ -996,9 +1002,94 @@ class RedBlackTree<T> extends BinarySearchTree<T> {
   }
 }
 
-const redNode = new RedBlackNode('123')
-redNode.color = '123'
-console.log('redNode', redNode)
+/**
+ * @description 二叉堆和堆排序
+ * @description 二叉堆，一种特殊的二叉树，可快速找出最大最小值，常用于优先队列、堆排序算法等
+ * @description 二叉堆两个主要特性：1.（结构特性）二叉堆是完全二叉树，树的每一层都有左、右子节点，且最后一层叶节点尽可能都是左侧子节点；2.（堆特性）最大堆或最小堆
+ */
+class MinHeap<T> {
+  public compareFn: CompareFn<T>;
+  heap: Array<T>;
+  constructor (compareFn = defaultCompare) {
+    this.compareFn = compareFn
+    this.heap = []
+  }
+
+  // 该处使用数组形式保存二叉树，通过索引访问节点
+  // 给定index的节点，左侧节点索引为2*index+1，右侧节点索引为2*index+2，父节点索引为 (index - 1)/2
+  getLeftIndex (index: number): number {
+    return 2 * index + 1
+  }
+
+  getRightIndex (index: number): number {
+    return 2 * index + 2
+  }
+
+  getParentIndex (index: number | undefined): number | undefined {
+    if (!index) return undefined
+    return Math.floor((index - 1) / 2)
+  }
+
+  insert (value: T) {
+    if (!value) return false
+    this.heap.push(value)
+    // 将新插入的值和父节点比较交换，直到父节点小于新插入的值
+    this.siftUp(this.heap.length - 1)
+    return true
+  }
+
+  siftUp (index: number | undefined) {
+    let parent = this.getParentIndex(index)
+    if (!parent) return
+    while (index && parent && index > 0 && this.compareFn(this.heap[parent], this.heap[index]) >= Compare.BIGGER_THAN) {
+      swap(this.heap, parent, index)
+      index = parent
+      parent = this.getParentIndex(index)
+    }
+  }
+
+  size () {
+    return this.heap.length
+  }
+
+  isEmpty () {
+    return this.size() === 0
+  }
+
+  findMinimum () {
+    return this.isEmpty() ? undefined : this.heap[0]
+  }
+
+  // 移除最小值（最大值）表示移除数组中的第一个元素（根节点）
+  // 在移除后，将堆的最后一个元素移动至根部，执行siftDown方法比较交换元素，直到堆结构正常
+  extract () {
+    if (this.isEmpty()) return undefined
+    if (this.size() === 1) return this.heap.shift()
+    const removedValue = this.heap.shift()
+    this.siftDown(0)
+    return removedValue
+  }
+
+  siftDown (index) {
+    let element = index
+    const left = this.getLeftIndex(index)
+    const right = this.getRightIndex(index)
+    const size = this.size()
+    // 当前节点值大于左侧子节点值
+    if (left < size && this.compareFn(this.heap[element], this.heap[left]) > Compare.BIGGER_THAN) {
+      element = left
+    }
+    // 当前节点值大于右侧子节点值
+    if (right < size && this.compareFn(this.heap[element], this.heap[right]) > Compare.BIGGER_THAN) {
+      element = right
+    }
+    if (index !== element) {
+      swap(this.heap, index, element)
+      this.siftDown(element)
+    }
+  }
+}
+
 </script>
 
 <style scoped lang="scss"></style>
