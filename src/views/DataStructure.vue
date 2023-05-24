@@ -3,7 +3,18 @@
 </template>
 
 <script setup lang="ts">
-import { NODE_EXPAND } from 'element-plus/es/components/tree-v2/src/virtual-tree'
+// import { NODE_EXPAND } from 'element-plus/es/components/tree-v2/src/virtual-tree'
+
+function defaultToString<T> (item: T) {
+  if (item === null) {
+    return 'NULL'
+  } else if (item === undefined) {
+    return 'UNDEFINED'
+  } else if (typeof item === 'string' || item instanceof String) {
+    return `${item}`
+  }
+  return item.toString()
+}
 
 /**
  * @description 基于对象实现的栈，除了toString，其余方法复杂度均为O(1)
@@ -1087,6 +1098,71 @@ class MinHeap<T> {
       swap(this.heap, index, element)
       this.siftDown(element)
     }
+  }
+}
+
+/**
+ * @description 字典类
+ */
+
+class ValuePair {
+  key: string | number
+  value: any
+  constructor (key: string | number, value: any) {
+    this.key = key
+    this.value = value
+  }
+
+  toString () {
+    return `[#${this.key}: ${this.value}]`
+  }
+}
+
+class Dictionary<T> {
+  toStrFn: (item: T) => string
+  table: {[key: string]: ValuePair}
+  constructor (toStrFn = defaultToString) {
+    this.toStrFn = toStrFn
+    this.table = {}
+  }
+
+  hasKey (key: any) {
+    return this.table[this.toStrFn(key)] !== null
+  }
+
+  // 向字典中添加新元素，若key已存在，已存在的value会被新值覆盖
+  set (key: any, value: T) {
+    if (key && value) {
+      const tableKey = this.toStrFn(key)
+      this.table[tableKey] = new ValuePair(key, value)
+      return true
+    }
+    return false
+  }
+
+  get (key: any, value: T) {
+    const valuePair = this.table[this.toStrFn(key)]
+    return valuePair == null ? undefined : valuePair.value
+  }
+
+  remove (key: any) {
+    if (!this.hasKey(key)) return false
+    delete this.table[this.toStrFn(key)]
+    return true
+  }
+}
+
+/**
+ * @description 图 使用邻接表表示
+ */
+class Graph<T> {
+  isDirected: boolean
+  vertices: Array<T>
+  adjList: Dictionary<T>
+  constructor (isDirected = false) {
+    this.isDirected = isDirected
+    this.vertices = []
+    this.adjList = new Dictionary()
   }
 }
 
