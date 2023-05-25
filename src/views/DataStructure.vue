@@ -1167,7 +1167,7 @@ class Dictionary<T> {
 
 class Graph<T> {
   isDirected: boolean
-  vertices: Array<T>
+  vertices: T[]
   adjList: Dictionary<T>
   constructor (isDirected = false) {
     this.isDirected = isDirected
@@ -1224,13 +1224,6 @@ class Graph<T> {
  * @description 算法思想：追踪每个第一次访问的节点，并且追踪哪些节点还没有被完全搜索（完全搜索一个顶点需要查看顶点的每一条边）
  * @description 待访问顶点列表的数据结构，深度优先遍历使用栈，广度优先遍历使用队列
  */
-  // initializeColor (vertices: Array<T>) {
-  //   const color = {}
-  //   for (let i = 0; i < vertices.length; i++) {
-  //     color[vertices[i]] = GraphColors.WHITE
-  //   }
-  //   return color
-  // }
   initializeColor<T> (vertices: Array<T>): {[key: string]: GraphColors} {
     const color: {[key: string]: GraphColors} = {}
     vertices.forEach(vertex => {
@@ -1240,6 +1233,11 @@ class Graph<T> {
   }
 
   // 广度优先搜索
+  // 对给定的顶点v，广度优先算法会访问所有与其距离为1的点，接着访问距离为2的点，以此类推，所以可以用于解决图中每个顶点u和给定顶点v的最短路径问题
+  // 广度优先算法不适合加权图的最短路径问题（比如城市A和城市B的最短路径）
+  // Dijkstra算法解决了单源最短路径问题
+  // Bellman-Ford算法解决边权值为负的单源最短路径问题
+  // A+搜搜算法解决了求仅一对顶点间的最短路径问题
   breadthFirstSearch (startVertex: T, callback?: (vertex: any) => void) {
     const vertices = this.getVertices()
     const adjList = this.getAdjList()
@@ -1247,15 +1245,31 @@ class Graph<T> {
     const color = this.initializeColor(vertices)
     // 创建队列，存储待访问、待探索顶点
     const queue = new Queue()
+
+    // 记录从v到u的距离
+
+    const distances: {[key: string]: number} = {}
+    // 前朔点predecessors[u]，推导从v到其他每个顶点u的最短路径
+    const predecessors: {[key: string]: T | string} = {}
+
+    vertices.forEach((vertex) => {
+      const key = defaultToString(vertex)
+      distances[key] = 0
+      predecessors[key] = ''
+    })
+
     queue.enqueue(startVertex)
     // 如果队列不为空，将u从队列中出列，标注为灰色（被发现的），将u的所有未被访问过的邻接点（白色）入列，然后将u标注为黑色（已被探索过）
     while (!queue.isEmpty()) {
-      const u = queue.dequeue()
+      const u = queue.dequeue() as T
       const neighbors = adjList.get(u)
       color[defaultToString(u)] = GraphColors.GRAY
       neighbors.forEach((neighbor: T) => {
-        if (color[defaultToString(neighbor)] === GraphColors.WHITE) {
-          color[defaultToString(neighbor)] = GraphColors.GRAY
+        const neiKey = defaultToString(neighbor)
+        if (color[neiKey] === GraphColors.WHITE) {
+          color[neiKey] = GraphColors.GRAY
+          distances[neiKey] = distances[defaultToString(u)] + 1
+          predecessors[neiKey] = u
           queue.enqueue(neighbor)
         }
       })
