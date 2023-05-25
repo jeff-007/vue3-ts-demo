@@ -1081,7 +1081,7 @@ class MinHeap<T> {
     return removedValue
   }
 
-  siftDown (index) {
+  siftDown (index: number) {
     let element = index
     const left = this.getLeftIndex(index)
     const right = this.getRightIndex(index)
@@ -1131,7 +1131,7 @@ class Dictionary<T> {
   }
 
   // 向字典中添加新元素，若key已存在，已存在的value会被新值覆盖
-  set (key: any, value: T) {
+  set (key: any, value: any) {
     if (key && value) {
       const tableKey = this.toStrFn(key)
       this.table[tableKey] = new ValuePair(key, value)
@@ -1140,7 +1140,7 @@ class Dictionary<T> {
     return false
   }
 
-  get (key: any, value: T) {
+  get (key: any) {
     const valuePair = this.table[this.toStrFn(key)]
     return valuePair == null ? undefined : valuePair.value
   }
@@ -1154,7 +1154,17 @@ class Dictionary<T> {
 
 /**
  * @description 图 使用邻接表表示
+ * @param {boolean} isDirected 是否为有向图
+ * @param {array} vertices 顶点数组
+ * @param {Dictionary} adjList 以字典形式实现邻接表 顶点作为键，邻接点列表作为值
  */
+
+ enum GraphColors {
+  WHITE = 0, // 顶点未被访问过
+  GRAY = 1, // 顶点被访问过，但未被探索过
+  BLACK = 2, // 顶点被访问过且被完全探索过
+}
+
 class Graph<T> {
   isDirected: boolean
   vertices: Array<T>
@@ -1164,7 +1174,115 @@ class Graph<T> {
     this.vertices = []
     this.adjList = new Dictionary()
   }
+
+  // 添加顶点
+  addVertex (v: T) {
+    if (this.vertices.includes(v)) return
+    this.vertices.push(v)
+    this.adjList.set(v, [])
+  }
+
+  // 添加顶点之间的边
+  // 先判断待连接的两顶点是否存在于图中
+  addEdge (v: T, w: T) {
+    if (!this.adjList.get(v)) {
+      this.addVertex(v)
+    }
+    if (!this.adjList.get(w)) {
+      this.addVertex(w)
+    }
+    this.adjList.get(v).push(w)
+    if (!this.isDirected) {
+      this.adjList.get(w).push(v)
+    }
+  }
+
+  getVertices () {
+    return this.vertices
+  }
+
+  getAdjList () {
+    return this.adjList
+  }
+
+  toString () {
+    let s = ''
+    for (let i = 0; i < this.vertices.length; i++) {
+      s += `${this.vertices[i]} -> `
+      const neighbors = this.adjList.get(this.vertices[i])
+      for (let j = 0; j < neighbors.length; j++) {
+        s += `${neighbors[j]} `
+      }
+      s += '\n'
+    }
+    return s
+  }
+
+  /**
+ * @description 图的遍历（广度优先搜索、深度优先搜索）
+ * @description 遍历可用来寻找特定顶点或两顶点之间的路径，检查图是否连通，是否包含环等
+ * @description 算法思想：追踪每个第一次访问的节点，并且追踪哪些节点还没有被完全搜索（完全搜索一个顶点需要查看顶点的每一条边）
+ * @description 待访问顶点列表的数据结构，深度优先遍历使用栈，广度优先遍历使用队列
+ */
+  // initializeColor (vertices: Array<T>) {
+  //   const color = {}
+  //   for (let i = 0; i < vertices.length; i++) {
+  //     color[vertices[i]] = GraphColors.WHITE
+  //   }
+  //   return color
+  // }
+  initializeColor<T> (vertices: Array<T>): {[key: string]: GraphColors} {
+    const color: {[key: string]: GraphColors} = {}
+    vertices.forEach(vertex => {
+      color[defaultToString(vertex)] = GraphColors.WHITE
+    })
+    return color
+  }
+
+  // 广度优先搜索
+  breadthFirstSearch (startVertex: T, callback?: (vertex: any) => void) {
+    const vertices = this.getVertices()
+    const adjList = this.getAdjList()
+    // 初始化所有节点均标记为未访问状态
+    const color = this.initializeColor(vertices)
+    // 创建队列，存储待访问、待探索顶点
+    const queue = new Queue()
+    queue.enqueue(startVertex)
+    // 如果队列不为空，将u从队列中出列，标注为灰色（被发现的），将u的所有未被访问过的邻接点（白色）入列，然后将u标注为黑色（已被探索过）
+    while (!queue.isEmpty()) {
+      const u = queue.dequeue()
+      const neighbors = adjList.get(u)
+      color[defaultToString(u)] = GraphColors.GRAY
+      neighbors.forEach((neighbor: T) => {
+        if (color[defaultToString(neighbor)] === GraphColors.WHITE) {
+          color[defaultToString(neighbor)] = GraphColors.GRAY
+          queue.enqueue(neighbor)
+        }
+      })
+      color[defaultToString(u)] = GraphColors.BLACK
+      callback && callback(u)
+    }
+  }
 }
+
+const graph = new Graph()
+const vertices = ['A', 'B', 'C', 'D', 'E', 'F']
+
+for (let i = 0; i < vertices.length; i++) {
+  graph.addVertex(vertices[i])
+}
+
+graph.addEdge('A', 'B')
+graph.addEdge('A', 'C')
+graph.addEdge('A', 'D')
+graph.addEdge('C', 'D')
+graph.addEdge('C', 'F')
+graph.addEdge('E', 'F')
+
+console.log(graph.toString())
+graph.breadthFirstSearch(vertices[2], (value) => {
+  console.log(value)
+})
 
 </script>
 
