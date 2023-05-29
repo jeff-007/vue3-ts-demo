@@ -1369,6 +1369,53 @@ function mergeSortArray<T> (left: T[], right: T[], compareFn: CompareFn<T>) {
   return result.concat(i < left.length ? left.slice(i) : right.slice(j))
 }
 
+/**
+ * @description 快速排序
+ * @description 简介:
+ * (1) 首先从数组中选择一个值作为主元（pivot），也就是数组中间的那个值。
+ * (2) 创建两个指针，左指针指向数组第一个值，右指针指向数组最后一个值。移动左指针直到找到一个比主元大的值，移动右指针直到找到一个比主元小的值，然后交换它们，重复这个过程，直到左指针超过了右指针。这个过程将使得比主元小的值都排在主元之前，而比主元大的值都排在主元之后。这一步叫作划分（partition）操作。
+ * (3) 接着，算法对划分后的小数组（较主元小的值组成的子数组，以及较主元大的值组成的子数组）重复之前的两个步骤，直至数组已完全排序。
+ * @description 特点：复杂度为O(n*log(n))，且性能通常比其他相同复杂度的排序算法好
+ */
+function quickSort<T> (array: Array<T>, compareFn = defaultCompare) {
+  return quick<T>(array, 0, array.length - 1, compareFn)
+}
+
+function quick<T> (array: T[], left: number, right: number, compareFn: CompareFn<T>) {
+  let index
+  if (array.length > 1) {
+    // quickPartition完成排序，并返回左指针
+    // 根据返回的左指针，将数组分段，并继续在分段后的数组中递归排序
+    index = quickPartition(array, left, right, compareFn)
+    if (left < index - 1) {
+      quick(array, left, index - 1, compareFn)
+    }
+    if (index < right) {
+      quick(array, index, right, compareFn)
+    }
+  }
+}
+
+function quickPartition<T> (array: Array<T>, left: number, right:number, compareFn: CompareFn<T>): number {
+  const pivot = array[Math.floor((left + right) / 2)]
+  let i = left
+  let j = right
+  while (i <= j) {
+    while (compareFn(array[i], pivot) === Compare.LESS_THAN) {
+      i++
+    }
+    while (compareFn(array[j], pivot) === Compare.BIGGER_THAN) {
+      j--
+    }
+    if (i <= j) {
+      swap(array, i, j)
+      i++
+      j--
+    }
+  }
+  return i
+}
+
 </script>
 
 <style scoped lang="scss"></style>
