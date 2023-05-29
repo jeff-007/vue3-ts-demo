@@ -1298,6 +1298,77 @@ graph.breadthFirstSearch(vertices[2], (value) => {
   console.log(value)
 })
 
+// 排序算法
+
+/**
+ * @description 冒泡排序
+ * @description 简介：比较相邻的两个项，如果第一个比第二个大，则进行交换
+ * @description 特点： 最简单的排序，从运行事件看是最差的算法
+ */
+function bubbleSort<T> (array: T[], compareFn = defaultCompare) {
+  const { length } = array
+  for (let i = 0; i < length; i++) {
+    // 内层循环中可以跳过外层已比较过的元素，优化性能
+    for (let j = 0; j < length - 1 - i; j++) {
+      if (compareFn(array[j], array[j + 1]) === Compare.BIGGER_THAN) {
+        swap(array, j, j + 1)
+      }
+    }
+  }
+  return array
+}
+
+/**
+ * @description 选择排序
+ * @description 简介：找到数据结构中的最小值并将其放置在第一位，接着找到第二小的值放在第二位，以此类推
+ * @description 特点：和冒泡排序一样，包含嵌套的两个循环，复杂度为O(n2)
+ */
+function selectionSort<T> (array: T[], compareFn = defaultCompare) {
+  const { length } = array
+  let indexMin
+  for (let i = 0; i < length; i++) {
+    indexMin = i
+    for (let j = i; j < length; j++) {
+      if (compareFn(array[indexMin], array[j]) === Compare.BIGGER_THAN) {
+        indexMin = j
+      }
+    }
+    if (i !== indexMin) {
+      swap(array, i, indexMin)
+    }
+  }
+  return array
+}
+
+/**
+ * @description 归并排序
+ * @description 简介：将原始数组切分成较小的数组，直到每个小数组只有一个位置，接着将小数组归并成较大的数组，直到最后只有一个排序完毕的大数组。 Mozilla Firefox使用归并排序作为Array.prototype.sort的实现，Chrome（V8引擎）使用了一个快速排序的变体
+ * @description 特点：复杂度为O(n*log(n))
+ */
+function mergeSort<T> (array: T[], compareFn = defaultCompare) {
+  if (array.length > 1) {
+    const { length } = array
+    const middle = Math.floor(length / 2)
+    const left = mergeSort(array.slice(0, middle), compareFn)
+    const right = mergeSort(array.slice(middle, length), compareFn)
+    array = mergeSortArray<T>(left, right, compareFn)
+  }
+  return array
+}
+
+// 接受两个数组，归并至一个大数组
+// 比较来自left数组的项是否比来自right数组的项小，如果是，将该项从left数组添加至归并结果数组
+// 然后将left、right数组得剩余项添加至归并数组中
+function mergeSortArray<T> (left: T[], right: T[], compareFn: CompareFn<T>) {
+  let i = 0
+  let j = 0
+  const result = []
+  while (i < left.length && j < right.length) {
+    result.push(compareFn(left[i], right[j]) === Compare.LESS_THAN ? left[i++] : right[j++])
+  }
+  return result.concat(i < left.length ? left.slice(i) : right.slice(j))
+}
+
 </script>
 
 <style scoped lang="scss"></style>
