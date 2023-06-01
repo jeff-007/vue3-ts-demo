@@ -520,7 +520,8 @@ class DoublyLinkedList<T> extends LinkedList<T> {
  */
 enum Compare {
   LESS_THAN = -1,
-  BIGGER_THAN = 1
+  BIGGER_THAN = 1,
+  EQUALS = 0,
 }
 
 type CompareFn<T> = (a: T, b: T) => number;
@@ -1394,6 +1395,7 @@ function quick<T> (array: T[], left: number, right: number, compareFn: CompareFn
       quick(array, index, right, compareFn)
     }
   }
+  return array
 }
 
 function quickPartition<T> (array: Array<T>, left: number, right:number, compareFn: CompareFn<T>): number {
@@ -1414,6 +1416,34 @@ function quickPartition<T> (array: Array<T>, left: number, right:number, compare
     }
   }
   return i
+}
+
+/**
+ * @description 二分搜索
+ * @description 简介：选择数组中间值，若选中值为待搜索值，执行结束；若待搜索值比选中值小，返回步骤1并在选中值左边的子数组中寻找；反之则返回步骤1并在选种值右边的子数组中寻找
+ * @description 特点：
+ */
+function binarySearch<T> (array: T[], value: any, compareFn = defaultCompare) {
+  // 先通过快速排序进行数组排序
+  const sortedArray = quickSort(array)
+  let low = 0
+  let high = sortedArray.length - 1
+  while (lesserOrEquals(low, high, compareFn)) {
+    const mid = Math.floor((low + high) / 2)
+    const element = sortedArray[mid]
+    if (compareFn(element, value) === Compare.LESS_THAN) {
+      low = mid + 1
+    } else if (compareFn(element, value) === Compare.BIGGER_THAN) {
+      high = mid - 1
+    } else {
+      return mid
+    }
+  }
+}
+
+function lesserOrEquals<T> (a: T, b: T, compareFn = defaultCompare) {
+  const comp = compareFn(a, b)
+  return comp === Compare.LESS_THAN || comp === Compare.EQUALS
 }
 
 </script>
