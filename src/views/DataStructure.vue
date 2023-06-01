@@ -5,6 +5,8 @@
 <script setup lang="ts">
 // import { NODE_EXPAND } from 'element-plus/es/components/tree-v2/src/virtual-tree'
 
+const DOES_NOT_EXIST = 'Does not exist'
+
 function defaultToString<T> (item: T) {
   if (item === null) {
     return 'NULL'
@@ -14,6 +16,33 @@ function defaultToString<T> (item: T) {
     return `${item}`
   }
   return item.toString()
+}
+
+enum Compare {
+  LESS_THAN = -1,
+  BIGGER_THAN = 1,
+  EQUALS = 0,
+}
+
+type CompareFn<T> = (a: T, b: T) => number;
+
+// 比较两个元素
+function defaultCompare<T> (a: T, b: T): number {
+  if (a === b) return 0
+  return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN
+}
+
+function defaultDiff (a: any, b: any) {
+  if (typeof a !== 'number' || typeof b !== 'number') {
+    return Math.abs(defaultToString(a).charCodeAt(0) - defaultToString(b).charCodeAt(0))
+  }
+  return Math.abs(a - b)
+}
+
+function swap<T> (array: Array<T>, a: number, b: number) {
+  const temp = array[a]
+  array[a] = array[b]
+  array[b] = temp
 }
 
 /**
@@ -105,8 +134,6 @@ function decimalToBinary (decNumber: number, base: number): string {
   }
   return binaryString
 }
-
-console.log(decimalToBinary(100345, 35))
 
 /**
  * @param {number} count 队列长度
@@ -518,25 +545,6 @@ class DoublyLinkedList<T> extends LinkedList<T> {
 /**
  * @description 有序链表
  */
-enum Compare {
-  LESS_THAN = -1,
-  BIGGER_THAN = 1,
-  EQUALS = 0,
-}
-
-type CompareFn<T> = (a: T, b: T) => number;
-
-// 比较两个元素
-function defaultCompare<T> (a: T, b: T): number {
-  if (a === b) return 0
-  return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN
-}
-
-function swap<T> (array: Array<T>, a: number, b: number) {
-  const temp = array[a]
-  array[a] = array[b]
-  array[b] = temp
-}
 
 class SortedLinkedList<T> extends LinkedList<T> {
   public compareFn: CompareFn<T>
@@ -1444,6 +1452,38 @@ function binarySearch<T> (array: T[], value: any, compareFn = defaultCompare) {
 function lesserOrEquals<T> (a: T, b: T, compareFn = defaultCompare) {
   const comp = compareFn(a, b)
   return comp === Compare.LESS_THAN || comp === Compare.EQUALS
+}
+
+function biggerOrEquals<T> (a: T, b: T, compareFn = defaultCompare) {
+  const comp = compareFn(a, b)
+  return comp === Compare.BIGGER_THAN || comp === Compare.EQUALS
+}
+
+/**
+ * @description 内插搜索
+ * @description 简介：改良版二分搜索，区别于二分搜索检查mid位置上的值，内插搜素根据待搜索值检查数组中的不同地方
+ * @description 特点：
+ */
+function interpolationSearch<T> (array: Array<T>, value: T, compareFn = defaultCompare, equalsFn = defaultEquals, diffFn = defaultDiff) {
+  const { length } = array
+  let low = 0
+  let high = length - 1
+  let position = -1
+  let delta = -1
+  while (low <= high && biggerOrEquals(value, array[low], compareFn) && lesserOrEquals(value, array[high], compareFn)) {
+    // 根据待查值在数组最大、最小值之间的偏移决定索引的偏移
+    delta = diffFn(value, array[low]) / diffFn(array[high], array[low])
+    position = low + Math.floor((high - low) * delta)
+    if (equalsFn(array[position], value)) {
+      return position
+    }
+    if (compareFn(array[position], value) === Compare.LESS_THAN) {
+      low = position + 1
+    } else {
+      high = position - 1
+    }
+  }
+  return DOES_NOT_EXIST
 }
 
 </script>
