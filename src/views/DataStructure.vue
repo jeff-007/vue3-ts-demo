@@ -1486,6 +1486,18 @@ function interpolationSearch<T> (array: Array<T>, value: T, compareFn = defaultC
   return DOES_NOT_EXIST
 }
 
+/**
+ * @description Fisher-Yates随机算法
+ * @description 简介：迭代数组，从最后一位开始将当前位置和随机一个位置进行交换
+ * @description 特点：可以保证随机过的位置不会再被随机一次（洗扑克牌次数越多，随机效果越差）
+ */
+function shuffle<T> (array: Array<T>) {
+  for (let i = 0; i < array.length - 1; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1))
+    swap(array, i, randomIndex)
+  }
+}
+
 </script>
 
 <style scoped lang="scss"></style>
