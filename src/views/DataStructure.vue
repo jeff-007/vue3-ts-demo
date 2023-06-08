@@ -1498,6 +1498,44 @@ function shuffle<T> (array: Array<T>) {
   }
 }
 
+// 动态规划
+
+/**
+ * @description 最少硬币找零
+ * @description 简介：给出要找零的钱数，以及可用的硬币面额d1，d2，...dn及其数量，找出有多少种找零的方法，最少找零是需要找到所需最少硬币数的问题
+ */
+
+/**
+ * @description 背包问题
+ * @description 简介：给定固定大小、总重量w的背包，以及一组有价值和重量的物品，找出一个最佳方案，使得装入背包的物品重量不超过总重，且价值最大
+ * @description 物品重量、价值以一维数组表示，各物品通过索引在两个数组中查询对应的重量和价值
+ * @params capacity：总承重 weights：物品重量 values：物品价值
+ */
+function knapSack (capacity: number, weights: number[], values: number[], n: number) {
+  // 最终解决方案的矩阵
+  const kS: number[][] = []
+  for (let i = 0; i <= n; i++) {
+    kS[i] = []
+  }
+  for (let i = 0; i <= n; i++) {
+    // 将背包总承重均分为单位承重，并计算单位承重下的最大价值方案
+    // 只处理索引不为0的行和列，i表示第几个物品，values[i-1]表示第i个物品的价值，weights[i-1]表示第i个物品的重量
+    // 在每一次单位承重的循环中，物品i的重量必须小于当前单位承重，才能成为解决方案的一部分；超出则使用上一个解决方案的值
+    // 二维数组右下角的值为当前给定总承重下的最大物品价值
+    for (let w = 0; w <= capacity; w++) {
+      if (i === 0 || w === 0) {
+        kS[i][w] = 0
+      } else if (weights[i - 1] <= w) {
+        const curValue = values[i - 1] + kS[i - 1][w - weights[i - 1]]
+        const preValue = kS[i - 1][w]
+        kS[i][w] = curValue > preValue ? curValue : preValue
+      } else {
+        kS[i][w] = kS[i - 1][w]
+      }
+    }
+  }
+}
+
 </script>
 
 <style scoped lang="scss"></style>
